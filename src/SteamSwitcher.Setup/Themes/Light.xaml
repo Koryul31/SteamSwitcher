@@ -1,0 +1,59 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="WindowBackgroundColor">#F3EFE6</Color>
+    <Color x:Key="TitleBarColor">#F8F4EB</Color>
+    <Color x:Key="DockColor">#F8F4EB</Color>
+    <Color x:Key="SurfaceColor">#FCFAF5</Color>
+    <Color x:Key="SurfaceAltColor">#EAE4D8</Color>
+    <Color x:Key="FieldColor">#F7F2E8</Color>
+    <Color x:Key="InkColor">#1D1C18</Color>
+    <Color x:Key="MutedColor">#756F64</Color>
+    <Color x:Key="BorderColor">#DDD5C6</Color>
+    <Color x:Key="AccentColor">#176B57</Color>
+    <Color x:Key="AccentSoftColor">#E1EEE8</Color>
+    <Color x:Key="BayBAccentColor">#4B6CB7</Color>
+    <Color x:Key="BayBAccentSoftColor">#E7ECF8</Color>
+    <Color x:Key="OnAccentColor">#F7FBF9</Color>
+    <Color x:Key="WarningColor">#B86135</Color>
+    <Color x:Key="WarningSoftColor">#F2E1D3</Color>
+    <Color x:Key="DangerColor">#A43D31</Color>
+    <Color x:Key="GridLineColor">#18A99D8B</Color>
+    <Color x:Key="HoverColor">#EFE9DD</Color>
+
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="TitleBarBrush" Color="{StaticResource TitleBarColor}" />
+    <SolidColorBrush x:Key="DockBrush" Color="{StaticResource DockColor}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="{StaticResource SurfaceAltColor}" />
+    <SolidColorBrush x:Key="FieldBrush" Color="{StaticResource FieldColor}" />
+    <SolidColorBrush x:Key="InkBrush" Color="{StaticResource InkColor}" />
+    <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="{StaticResource AccentSoftColor}" />
+    <SolidColorBrush x:Key="BayBAccentBrush" Color="{StaticResource BayBAccentColor}" />
+    <SolidColorBrush x:Key="BayBAccentSoftBrush" Color="{StaticResource BayBAccentSoftColor}" />
+    <SolidColorBrush x:Key="OnAccentBrush" Color="{StaticResource OnAccentColor}" />
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
+    <SolidColorBrush x:Key="WarningSoftBrush" Color="{StaticResource WarningSoftColor}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="GridLineBrush" Color="{StaticResource GridLineColor}" />
+    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
+
+    <DrawingBrush x:Key="PageGridBrush" TileMode="Tile"
+                  Viewport="0,0,32,32" ViewportUnits="Absolute"
+                  Stretch="None" AlignmentX="Left" AlignmentY="Top">
+        <DrawingBrush.Drawing>
+            <GeometryDrawing Brush="Transparent">
+                <GeometryDrawing.Geometry>
+                    <GeometryGroup>
+                        <LineGeometry StartPoint="16,0" EndPoint="16,32" />
+                    </GeometryGroup>
+                </GeometryDrawing.Geometry>
+                <GeometryDrawing.Pen>
+                    <Pen Brush="{StaticResource GridLineBrush}" Thickness="1" />
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+</ResourceDictionary>

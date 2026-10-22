@@ -1,0 +1,29 @@
+﻿# Build output
+bin/
+obj/
+dist/
+publish/
+output/
+
+# Local configuration and runtime data
+settings.ini
+setup.ini
+backup/
+logs/
+*.log
+*.pdb
+
+# IDE and user files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Test and local artifacts
+test-vm/
+release/
+*.zip
+
+# Editor/build backups
+*.bak
+*.bak-*

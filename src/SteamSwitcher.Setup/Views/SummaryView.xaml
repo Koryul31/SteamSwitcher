@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="SteamSwitcher.Setup.Views.SummaryView"
+             xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SteamSwitcher.Setup.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
+        <StackPanel Margin="0,0,24,8">
+            <Border Style="{StaticResource HelpStrip}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="22" Height="22" CornerRadius="11"
+                            Background="{DynamicResource AccentSoftBrush}"
+                            VerticalAlignment="Top" Margin="0,1,10,0">
+                        <TextBlock Text="i" FontFamily="{StaticResource BodyFont}" FontSize="12"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding SummaryStatus}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{Binding WarningText}" Style="{StaticResource BodyText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource HelpStrip}" Margin="0,0,0,12"
+                    Visibility="{Binding ApplyCompleted, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc Key=SummaryReadyTitle}" Style="{StaticResource SectionTitle}"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Text="{loc:Loc Key=AppliedDesc}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+
+            <ContentControl Content="{Binding BayA}" ContentTemplate="{StaticResource SummaryBayTemplate}" />
+            <ContentControl Content="{Binding BayB}" ContentTemplate="{StaticResource SummaryBayTemplate}"
+                            Margin="0,10,0,0" />
+
+            <Border Style="{StaticResource BayCard}" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc Key=SummaryAccesses}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{Binding ShortcutLocationsPreview}" Style="{StaticResource CaptionText}"
+                                   Margin="0,4,0,0" />
+                        <TextBlock Text="{Binding ShortcutSummary}" Style="{StaticResource CaptionText}"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=OpenAccess}"
+                            Padding="12,0" Command="{Binding OpenShortcutsFolderCommand}"
+                            VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <controls:InfoTip Margin="0,12,0,0"
+                              Text="{loc:Loc Key=SummaryTip}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

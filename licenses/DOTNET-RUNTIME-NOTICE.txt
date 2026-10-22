@@ -1,0 +1,13 @@
+Microsoft .NET 9 Runtime
+========================
+
+This portable package includes the Microsoft .NET runtime.
+
+Copyright (c) .NET Foundation and Contributors.
+
+The .NET runtime is primarily licensed under the MIT License, with additional
+Microsoft components under their respective licenses. The complete license
+and third-party notices are available at:
+
+https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT

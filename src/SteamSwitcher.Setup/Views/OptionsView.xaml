@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="SteamSwitcher.Setup.Views.OptionsView"
+             xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SteamSwitcher.Setup.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
+        <Grid Margin="0,0,24,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Margin="0,0,6,0">
+                <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="210" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Key=ThemeTitle}" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{loc:Loc Key=ThemeDesc}"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeOptions}"
+                                  SelectedValue="{Binding ThemeMode}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Label"
+                                  Style="{StaticResource FieldComboBox}"
+                                  VerticalAlignment="Center"
+                                  AutomationProperties.Name="{loc:Loc Key=ThemeTitle}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="210" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Key=LanguageTitle}" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{loc:Loc Key=LanguageDesc}"
+                                       Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding LanguageOptions}"
+                                  SelectedValue="{Binding LanguageSetting}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Label"
+                                  Style="{StaticResource FieldComboBox}"
+                                  VerticalAlignment="Center"
+                                  AutomationProperties.Name="{loc:Loc Key=LanguageTitle}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource BayCard}">
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc Key=OptionsAdvanced}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{loc:Loc Key=TimeoutLabel}" Style="{StaticResource CaptionText}"
+                                   Margin="0,10,0,5" />
+                        <TextBox Text="{Binding ShutdownTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FieldTextBox}" Width="72" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                <Border Style="{StaticResource HelpStrip}">
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc Key=WelcomeReplayTitle}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{loc:Loc Key=WelcomeReplayDesc}"
+                                   Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                        <Button Style="{StaticResource GhostButton}"
+                                Content="{loc:Loc Key=WelcomeReplayAction}"
+                                Padding="11,0" Margin="0,10,0,0"
+                                HorizontalAlignment="Left"
+                                AutomationProperties.AutomationId="WelcomeReplayButton"
+                                Click="WelcomeButton_Click" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
+

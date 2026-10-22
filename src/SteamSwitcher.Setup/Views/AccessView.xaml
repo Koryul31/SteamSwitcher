@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="SteamSwitcher.Setup.Views.AccessView"
+             xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SteamSwitcher.Setup.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
+        <StackPanel Margin="0,0,24,8">
+            <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Key=AccessWhere}" Style="{StaticResource SectionTitle}" />
+                            <StackPanel Orientation="Horizontal" Margin="0,9,0,0">
+                                <CheckBox Content="{loc:Loc Key=AccessDesktop}" IsChecked="{Binding CreateDesktop}"
+                                          Style="{StaticResource FieldCheckBox}" Margin="0,0,26,0" />
+                                <CheckBox Content="{loc:Loc Key=AccessStartMenu}" IsChecked="{Binding CreateStartMenu}"
+                                          Style="{StaticResource FieldCheckBox}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                            <TextBlock Text="{loc:Loc Key=AccessOrganization}" Style="{StaticResource CaptionText}" Margin="0,0,0,5" />
+                            <ComboBox ItemsSource="{Binding ShortcutLayoutOptions}"
+                                      SelectedValue="{Binding ShortcutLayout}"
+                                      SelectedValuePath="Value"
+                                      DisplayMemberPath="Label"
+                                      Style="{StaticResource FieldComboBox}"
+                                      AutomationProperties.Name="{loc:Loc Key=AccessOrganization}" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding ShortcutLocationsPreview}"
+                               Style="{StaticResource CaptionText}" Margin="0,10,0,0" />
+                </Grid>
+            </Border>
+
+            <ContentControl Content="{Binding BayA}"
+                            ContentTemplate="{StaticResource AccessBayTemplate}" />
+            <ContentControl Content="{Binding BayB}"
+                            ContentTemplate="{StaticResource AccessBayTemplate}"
+                            Margin="0,10,0,0" />
+
+            <Border Style="{StaticResource BayCard}" Margin="0,12,0,0">
+                <StackPanel>
+                    <CheckBox Content="{loc:Loc Key=ConfirmSwitch}"
+                              IsChecked="{Binding ConfirmSwitch}"
+                              Style="{StaticResource FieldCheckBox}"
+                              AutomationProperties.AutomationId="ConfirmSwitchCheckBox" />
+                    <TextBlock Text="{loc:Loc Key=ConfirmSwitchDesc}"
+                               Style="{StaticResource CaptionText}"
+                               Margin="0,7,0,0" />
+                </StackPanel>
+            </Border>
+
+            <controls:InfoTip Margin="0,12,0,0"
+                              Text="{loc:Loc Key=AccessApplyTip}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

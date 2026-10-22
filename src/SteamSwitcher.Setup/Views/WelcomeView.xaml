@@ -1,0 +1,514 @@
+<UserControl x:Class="SteamSwitcher.Setup.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
+             x:Name="WelcomeRoot"
+             Background="{DynamicResource WindowBackgroundBrush}"
+             Focusable="True"
+             Loaded="Welcome_Loaded"
+             Unloaded="Welcome_Unloaded"
+             PreviewKeyDown="Welcome_PreviewKeyDown">
+
+    <UserControl.Resources>
+        <Style x:Key="WelcomeTitle" TargetType="TextBlock" BasedOn="{StaticResource PageTitle}">
+            <Setter Property="FontSize" Value="46" />
+            <Setter Property="LineHeight" Value="48" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="MaxWidth" Value="530" />
+        </Style>
+
+        <Style x:Key="WelcomeSceneTitle" TargetType="TextBlock" BasedOn="{StaticResource PageTitle}">
+            <Setter Property="FontSize" Value="36" />
+            <Setter Property="LineHeight" Value="38" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="WelcomeListText" TargetType="TextBlock" BasedOn="{StaticResource BodyText}">
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="LineHeight" Value="18" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="WelcomeBullet" TargetType="Border">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,1,0,0" />
+        </Style>
+
+        <Style x:Key="WelcomeCard" TargetType="Border" BasedOn="{StaticResource BayCard}">
+            <Setter Property="Padding" Value="20,18" />
+        </Style>
+
+        <Style x:Key="WelcomeBayCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+
+        <Style x:Key="WelcomeStepNumber" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FlowDirection" Value="LeftToRight" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="34,18,34,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{loc:Loc Key=WelcomeKicker}" Style="{StaticResource KickerText}"
+                           VerticalAlignment="Center" />
+                <Border Width="1" Height="12" Background="{DynamicResource BorderBrush}"
+                        Margin="12,0" VerticalAlignment="Center" Opacity="0.8" />
+                <TextBlock x:Name="ProgressText" Text="01 / 02" Style="{StaticResource MonoText}"
+                           FontSize="10.5" VerticalAlignment="Center"
+                           FlowDirection="LeftToRight" />
+            </StackPanel>
+
+            <Button x:Name="SkipButton" Style="{StaticResource GhostButton}"
+                    Content="{loc:Loc Key=WelcomeSkip}" Padding="11,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="WelcomeSkipButton"
+                    Click="Skip_Click" />
+        </Grid>
+
+        <ScrollViewer x:Name="WelcomeScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      HorizontalContentAlignment="Stretch"
+                      VerticalContentAlignment="Stretch">
+            <Grid Margin="34,10,34,22" VerticalAlignment="Stretch">
+                <Grid x:Name="SceneOne" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="440" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="0,0,26,0">
+                        <TextBlock x:Name="HeroTitleText"
+                                   Text="{loc:Loc Key=WelcomeTitle}"
+                                   Style="{StaticResource WelcomeTitle}"
+                                   Opacity="0" />
+
+                        <TextBlock x:Name="HeroSubtitleText"
+                                   Text="{loc:Loc Key=WelcomeSubtitle}"
+                                   Style="{StaticResource PageSubtitle}"
+                                   Margin="0,17,0,0"
+                                   MaxWidth="500"
+                                   Opacity="0" />
+                    </StackPanel>
+
+                    <Grid x:Name="HeroVisual" Grid.Row="0" Grid.Column="1"
+                          Width="440" Height="404"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"
+                          Opacity="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="360" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Height="360">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition Width="200" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border x:Name="BayACard" Grid.Column="0"
+                                    Width="200" Height="250"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Style="{StaticResource WelcomeBayCard}"
+                                    AutomationProperties.Name="Steam A"
+                                    Opacity="0">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border Width="44" Height="44" CornerRadius="12"
+                                            Background="{DynamicResource AccentSoftBrush}">
+                                        <Path Style="{StaticResource SteamGlyphStyle}"
+                                              Width="22" Height="22" />
+                                    </Border>
+                                    <TextBlock Text="A" FontFamily="{StaticResource DisplayFont}"
+                                               FontSize="68" LineHeight="68"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center" Margin="0,10,0,0" />
+                                    <Border Width="42" Height="1" Background="{DynamicResource AccentBrush}"
+                                            HorizontalAlignment="Center" Opacity="0.55" Margin="0,10,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                <Border Width="40" Height="1" Background="{DynamicResource BorderBrush}" />
+                                <Ellipse x:Name="ConnectorDot" Width="10" Height="10"
+                                         Fill="{DynamicResource AccentBrush}"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Opacity="0" />
+                            </Grid>
+
+                            <Border x:Name="BayBCard" Grid.Column="2"
+                                    Width="200" Height="250"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Style="{StaticResource WelcomeBayCard}"
+                                    AutomationProperties.Name="Steam B"
+                                    Opacity="0">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border Width="44" Height="44" CornerRadius="12"
+                                            Background="{DynamicResource BayBAccentSoftBrush}">
+                                        <Path Style="{StaticResource SteamGlyphStyle}"
+                                              Width="22" Height="22"
+                                              Fill="{DynamicResource BayBAccentBrush}" />
+                                    </Border>
+                                    <TextBlock Text="B" FontFamily="{StaticResource DisplayFont}"
+                                               FontSize="68" LineHeight="68"
+                                               Foreground="{DynamicResource BayBAccentBrush}"
+                                               HorizontalAlignment="Center" Margin="0,10,0,0" />
+                                    <Border Width="42" Height="1" Background="{DynamicResource BayBAccentBrush}"
+                                            HorizontalAlignment="Center" Opacity="0.55" Margin="0,10,0,0" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Grid.Row="1"
+                                   Text="{loc:Loc Key=WelcomeDiagramCaption}"
+                                   Style="{StaticResource CaptionText}"
+                                   TextAlignment="Center"
+                                   MaxWidth="410"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,2,0,0" />
+                    </Grid>
+
+                    <Border x:Name="AfterSetupNote" Grid.Row="1" Grid.ColumnSpan="2"
+                            Style="{StaticResource HelpStrip}"
+                            Margin="0,20,0,0"
+                            Opacity="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="22" Height="22" CornerRadius="11"
+                                    Background="{DynamicResource AccentSoftBrush}"
+                                    VerticalAlignment="Top" Margin="0,1,0,0">
+                                <TextBlock Text="i" FontFamily="{StaticResource BodyFont}" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{loc:Loc Key=WelcomeAfterSetup}"
+                                       Style="{StaticResource CaptionText}"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid x:Name="SceneTwo" Visibility="Collapsed" VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock x:Name="SceneTwoTitleText"
+                                   Text="{loc:Loc Key=WelcomeSceneTwoTitle}"
+                                   Style="{StaticResource WelcomeSceneTitle}"
+                                   Opacity="0" />
+                        <TextBlock x:Name="SceneTwoSubtitleText"
+                                   Text="{loc:Loc Key=WelcomeSceneTwoSubtitle}"
+                                   Style="{StaticResource PageSubtitle}"
+                                   Margin="0,6,0,0"
+                                   Opacity="0" />
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border x:Name="DoesCard" Grid.Column="0" Margin="0,0,7,0"
+                                    Style="{StaticResource WelcomeCard}" Opacity="0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="22" Height="22" CornerRadius="11"
+                                                Background="{DynamicResource AccentSoftBrush}"
+                                                VerticalAlignment="Center">
+                                            <Viewbox Width="12" Height="12"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M2,6 L5,9 L10,2"
+                                                      Stroke="{DynamicResource AccentBrush}"
+                                                      StrokeThickness="1.7"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" />
+                                            </Viewbox>
+                                        </Border>
+                                        <TextBlock Text="{loc:Loc Key=WelcomeDoesTitle}"
+                                                   Style="{StaticResource SectionTitle}"
+                                                   Margin="9,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="0,10,0,0">
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource AccentSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.8,5 L4.3,7.5 L8.6,1.8"
+                                                          Stroke="{DynamicResource AccentBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoes1}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource AccentSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.8,5 L4.3,7.5 L8.6,1.8"
+                                                          Stroke="{DynamicResource AccentBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoes2}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource AccentSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.8,5 L4.3,7.5 L8.6,1.8"
+                                                          Stroke="{DynamicResource AccentBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoes3}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource AccentSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.8,5 L4.3,7.5 L8.6,1.8"
+                                                          Stroke="{DynamicResource AccentBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoes4}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="DoesNotCard" Grid.Column="1" Margin="7,0,0,0"
+                                    Style="{StaticResource WelcomeCard}" Opacity="0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="22" Height="22" CornerRadius="11"
+                                                Background="{DynamicResource WarningSoftBrush}"
+                                                VerticalAlignment="Center">
+                                            <Viewbox Width="12" Height="12"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M2,6 L10,6"
+                                                      Stroke="{DynamicResource WarningBrush}"
+                                                      StrokeThickness="1.7"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" />
+                                            </Viewbox>
+                                        </Border>
+                                        <TextBlock Text="{loc:Loc Key=WelcomeDoesNotTitle}"
+                                                   Style="{StaticResource SectionTitle}"
+                                                   Margin="9,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="0,10,0,0">
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource WarningSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.5,5 L8.5,5"
+                                                          Stroke="{DynamicResource WarningBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoesNot1}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource WarningSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.5,5 L8.5,5"
+                                                          Stroke="{DynamicResource WarningBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoesNot2}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource WarningSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.5,5 L8.5,5"
+                                                          Stroke="{DynamicResource WarningBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoesNot3}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource WelcomeBullet}"
+                                                    Background="{DynamicResource WarningSoftBrush}">
+                                                <Viewbox Width="10" Height="10"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M1.5,5 L8.5,5"
+                                                          Stroke="{DynamicResource WarningBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" />
+                                                </Viewbox>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{loc:Loc Key=WelcomeDoesNot4}"
+                                                       Style="{StaticResource WelcomeListText}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border x:Name="NextStepsStrip" Style="{StaticResource HelpStrip}"
+                                Margin="0,12,0,0" Opacity="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="01" Style="{StaticResource WelcomeStepNumber}" />
+                                    <TextBlock Text="{loc:Loc Key=StepInstallations}"
+                                               Style="{StaticResource SectionTitle}" FontSize="12.5"
+                                               Margin="9,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="02" Style="{StaticResource WelcomeStepNumber}" />
+                                    <TextBlock Text="{loc:Loc Key=StepAccounts}"
+                                               Style="{StaticResource SectionTitle}" FontSize="12.5"
+                                               Margin="9,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBlock Text="03" Style="{StaticResource WelcomeStepNumber}" />
+                                    <TextBlock Text="{loc:Loc Key=StepAccess}"
+                                               Style="{StaticResource SectionTitle}" FontSize="12.5"
+                                               Margin="9,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" Margin="34,0,34,18">
+            <Grid x:Name="SceneOneFooter">
+                <TextBlock Text="{loc:Loc Key=WelcomeHint}"
+                           Style="{StaticResource CaptionText}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           MaxWidth="590"
+                           TextTrimming="CharacterEllipsis" />
+                <Button x:Name="ContinueButton" Style="{StaticResource PrimaryButton}"
+                        Content="{loc:Loc Key=WelcomeContinue}"
+                        Padding="18,0"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="WelcomeContinueButton"
+                        Click="Continue_Click" />
+            </Grid>
+
+            <Grid x:Name="SceneTwoFooter" Visibility="Collapsed">
+                <TextBlock Text="{loc:Loc Key=WelcomeHint}"
+                           Style="{StaticResource CaptionText}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           MaxWidth="590"
+                           TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="BackButton" Style="{StaticResource GhostButton}"
+                            Content="{loc:Loc Key=ActionBack}"
+                            Padding="13,0"
+                            AutomationProperties.AutomationId="WelcomeBackButton"
+                            Click="Back_Click" />
+                    <Button x:Name="StartButton" Style="{StaticResource PrimaryButton}"
+                            Content="{loc:Loc Key=WelcomeStart}"
+                            Padding="18,0" Margin="6,0,0,0"
+                            AutomationProperties.AutomationId="WelcomeStartButton"
+                            Click="Start_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

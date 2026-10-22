@@ -1,0 +1,224 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DataTemplate x:Key="InstallationBayTemplate">
+        <Border Style="{StaticResource BayCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource AccentSoftBrush}">
+                        <TextBlock Text="{Binding Slot}" FontFamily="{StaticResource MonoFont}" FontSize="13"
+                                   Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="12,0,16,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding NameDisplay}" Style="{StaticResource BayTitleText}" />
+                        <TextBlock Text="{Binding PathDisplay}" Style="{StaticResource MonoText}"
+                                   Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Border Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="{DynamicResource SurfaceAltBrush}" CornerRadius="22" Padding="10,4">
+                        <TextBlock Text="{Binding InstallationStatusText}" Style="{StaticResource BayStatusText}"
+                                   FontFamily="{StaticResource BodyFont}" FontSize="11.5" FontWeight="SemiBold" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,11,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=ChooseFolder}"
+                            Padding="14,0"
+                            Command="{Binding DataContext.BrowseFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                    <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="{loc:Loc Key=InstallSteam}"
+                            Padding="14,0"
+                            Visibility="{Binding IsInstalled, Converter={StaticResource InverseBoolToVisibility}}"
+                            Command="{Binding DataContext.InstallCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=OpenFolder}"
+                            Padding="14,0"
+                            Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVisibility}}"
+                            Command="{Binding DataContext.OpenSteamFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                </Grid>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AccountBayTemplate">
+        <Border Style="{StaticResource BayCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource AccentSoftBrush}">
+                        <TextBlock Text="{Binding Slot}" FontFamily="{StaticResource MonoFont}" FontSize="13"
+                                   Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="12,0,16,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding NameDisplay}" Style="{StaticResource BayTitleText}" />
+                        <TextBlock Text="{Binding PathDisplay}" Style="{StaticResource MonoText}"
+                                   Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Border Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="{DynamicResource SurfaceAltBrush}" CornerRadius="22" Padding="10,4">
+                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource BayStatusText}"
+                                   FontFamily="{StaticResource BodyFont}" FontSize="11.5" FontWeight="SemiBold" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="220" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc Key=AccountAssociated}" Style="{StaticResource CaptionText}" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding Accounts}"
+                                  SelectedItem="{Binding SelectedAccount}"
+                                  DisplayMemberPath="DisplayName"
+                                  Style="{StaticResource FieldComboBox}"
+                                  IsEnabled="{Binding IsInstalled}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Bottom">
+                        <TextBlock Text="{loc:Loc Key=RememberPassword}" Style="{StaticResource CaptionText}" />
+                        <TextBlock Text="{Binding RememberText}" Style="{StaticResource RememberStatusText}"
+                                   FontFamily="{StaticResource BodyFont}"
+                                   FontSize="12.5" FontWeight="SemiBold"
+                                   Margin="0,6,0,0" TextTrimming="CharacterEllipsis"
+                                   ToolTip="{loc:Loc Key=AccountsTip}" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Grid.Row="2" Text="{Binding AccountHintText}" Style="{StaticResource CaptionText}"
+                           Margin="0,10,0,0" TextWrapping="Wrap" />
+
+                <Grid Grid.Row="3" Margin="0,11,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"
+                            AutomationProperties.Name="{Binding OpenSteamActionText}"
+                            Command="{Binding DataContext.OpenSteamCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource SteamGlyphStyle}" Width="14" Height="14"
+                                  Fill="{DynamicResource OnAccentBrush}" />
+                            <TextBlock Text="{Binding OpenSteamActionText}" Margin="7,0,0,0" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=Check}"
+                            Margin="6,0,0,0"
+                            AutomationProperties.AutomationId="CheckAccountsButton"
+                            Command="{Binding DataContext.RefreshAccountsCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                </Grid>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AccessBayTemplate">
+        <Border Style="{StaticResource BayCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource AccentSoftBrush}">
+                        <TextBlock Text="{Binding Slot}" FontFamily="{StaticResource MonoFont}" FontSize="13"
+                                   Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="12,0,16,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding NameDisplay}" Style="{StaticResource BayTitleText}" />
+                        <TextBlock Text="{Binding PathDisplay}" Style="{StaticResource MonoText}"
+                                   Margin="0,3,0,0" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc Key=AccessName}" Style="{StaticResource CaptionText}" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FieldTextBox}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                        <TextBlock Text="{loc:Loc Key=AccessType}" Style="{StaticResource CaptionText}" Margin="0,0,0,5" />
+                        <ComboBox ItemsSource="{Binding DataContext.ShortcutModeOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  SelectedValue="{Binding ShortcutMode}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Label"
+                                  Style="{StaticResource FieldComboBox}" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Style="{StaticResource GhostButton}" Content="{loc:Loc Key=AccessApplyBoth}"
+                            Padding="12,0" Margin="14,0,0,0" VerticalAlignment="Bottom"
+                            Command="{Binding DataContext.ApplyToBothCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                </Grid>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SummaryBayTemplate">
+        <Border Style="{StaticResource BayCard}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource AccentSoftBrush}"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Slot}" FontFamily="{StaticResource MonoFont}" FontSize="13"
+                               Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,14,0">
+                    <TextBlock Text="{Binding NameDisplay}" Style="{StaticResource BayTitleText}" FontSize="19" />
+                    <TextBlock Text="{Binding SelectedAccount.DisplayName}" Style="{StaticResource CaptionText}"
+                               Margin="0,3,0,0" />
+                    <TextBlock Text="{Binding ShortcutModeLabel}" Style="{StaticResource CaptionText}" Margin="0,2,0,0" />
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="{Binding StatusText}" Style="{StaticResource BayStatusText}"
+                           FontFamily="{StaticResource BodyFont}" FontSize="11.5" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>
