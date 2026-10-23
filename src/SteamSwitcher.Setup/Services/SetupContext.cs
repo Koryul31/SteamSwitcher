@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace SteamSwitcher.Setup.Services;
 
@@ -26,17 +26,18 @@ public sealed class SetupContext
         }
 
         var candidates = new List<string>();
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        if (!string.IsNullOrWhiteSpace(localAppData))
-        {
-            candidates.Add(Path.Combine(localAppData, "SteamSwitcher"));
-        }
 
         var baseDirectory = new DirectoryInfo(AppContext.BaseDirectory);
         for (var directory = baseDirectory; directory is not null; directory = directory.Parent)
         {
             candidates.Add(directory.FullName);
             candidates.Add(Path.Combine(directory.FullName, "SteamSwitcher"));
+        }
+
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (!string.IsNullOrWhiteSpace(localAppData))
+        {
+            candidates.Add(Path.Combine(localAppData, "SteamSwitcher"));
         }
 
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "app"));
@@ -49,9 +50,8 @@ public sealed class SetupContext
             }
         }
 
-        var fallback = !string.IsNullOrWhiteSpace(localAppData)
-            ? Path.Combine(localAppData, "SteamSwitcher")
-            : AppContext.BaseDirectory;
+        // Portable mode: always default to the application directory so settings.ini sits next to SteamSwitcher.exe
+        var fallback = AppContext.BaseDirectory;
 
         return new SetupContext(fallback);
     }

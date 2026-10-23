@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using SteamSwitcher.Setup.Models;
 
 namespace SteamSwitcher.Setup.Services;
@@ -16,6 +16,7 @@ public sealed class SetupPreferences
     public bool CreateStartMenu { get; set; } = true;
     public bool WelcomeCompleted { get; set; }
     public bool Exists { get; set; }
+    public bool IsSingleSteamMode { get; set; } = true;
 
     public static SetupPreferences Load(SetupContext context)
     {
@@ -37,6 +38,7 @@ public sealed class SetupPreferences
         preferences.CreateDesktop = ReadBool(document.Get("Setup", "CreateDesktop"), true);
         preferences.CreateStartMenu = ReadBool(document.Get("Setup", "CreateStartMenu"), true);
         preferences.WelcomeCompleted = ReadBool(document.Get("Setup", "WelcomeCompleted"), false);
+        preferences.IsSingleSteamMode = ReadBool(document.Get("Setup", "IsSingleSteamMode"), true);
         return preferences;
     }
 
@@ -53,6 +55,7 @@ public sealed class SetupPreferences
         document.Set("Setup", "CreateDesktop", CreateDesktop ? "true" : "false");
         document.Set("Setup", "CreateStartMenu", CreateStartMenu ? "true" : "false");
         document.Set("Setup", "WelcomeCompleted", WelcomeCompleted ? "true" : "false");
+        document.Set("Setup", "IsSingleSteamMode", IsSingleSteamMode ? "true" : "false");
         document.Save(context.SetupPath);
     }
 

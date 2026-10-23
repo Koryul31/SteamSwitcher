@@ -1,5 +1,7 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using SteamSwitcher.Setup.Localization;
 using SteamSwitcher.Setup.Models;
 
@@ -9,7 +11,8 @@ public sealed record ShortcutSpec(
     string Key,
     string Name,
     ShortcutMode Mode,
-    string SteamExePath);
+    string SteamExePath,
+    string? DirectoryPath = null);
 
 public sealed record ShortcutSyncResult(
     int Created,
@@ -19,6 +22,8 @@ public sealed record ShortcutSyncResult(
 
 public sealed class ShortcutService
 {
+    private readonly Core.Services.ShortcutService _coreShortcut = new();
+
     public ShortcutSyncResult Sync(
         string backendPath,
         string workingDirectory,
@@ -36,18 +41,10 @@ public sealed class ShortcutService
         var created = 0;
         var removed = 0;
         var paths = new List<string>();
-        object? shell = null;
 
         try
         {
-            var shellType = Type.GetTypeFromProgID("WScript.Shell")
-                ?? throw new InvalidOperationException(LocalizationService.T("StatusShortcutComUnavailable"));
-            shell = Activator.CreateInstance(shellType)
-                ?? throw new InvalidOperationException(LocalizationService.T("StatusShortcutStartFailed"));
-            dynamic wsh = shell;
-
-            // Clean up managed shortcuts in every known location,
-            // including locations used before the organization was changed.
+            // Clean up managed shortcuts in every known location
             foreach (var root in GetManagedRoots())
             {
                 if (!Directory.Exists(root))
@@ -59,7 +56,7 @@ public sealed class ShortcutService
                 {
                     try
                     {
-                        if (IsManagedShortcut(wsh, link))
+                        if (IsManagedShortcut(link))
                         {
                             File.Delete(link);
                             removed++;
@@ -67,7 +64,7 @@ public sealed class ShortcutService
                     }
                     catch
                     {
-                        // A foreign or locked shortcut must not block the rest.
+                        // A locked shortcut must not block the rest
                     }
                 }
             }
@@ -85,7 +82,6 @@ public sealed class ShortcutService
                 foreach (var root in activeRoots)
                 {
                     CreateForRoot(
-                        wsh,
                         root,
                         label,
                         backendPath,
@@ -100,13 +96,6 @@ public sealed class ShortcutService
         {
             return new ShortcutSyncResult(created, removed, paths, ex.Message);
         }
-        finally
-        {
-            if (shell is not null)
-            {
-                Marshal.FinalReleaseComObject(shell);
-            }
-        }
 
         return new ShortcutSyncResult(created, removed, paths, null);
     }
@@ -119,23 +108,9 @@ public sealed class ShortcutService
             return 0;
         }
 
-        object? shell = null;
         var count = 0;
         try
         {
-            var shellType = Type.GetTypeFromProgID("WScript.Shell");
-            if (shellType is null)
-            {
-                return 0;
-            }
-
-            shell = Activator.CreateInstance(shellType);
-            if (shell is null)
-            {
-                return 0;
-            }
-
-            dynamic wsh = shell;
             foreach (var root in roots)
             {
                 if (!Directory.Exists(root))
@@ -147,15 +122,12 @@ public sealed class ShortcutService
                 {
                     try
                     {
-                        if (IsManagedShortcut(wsh, link))
+                        if (IsManagedShortcut(link))
                         {
                             count++;
                         }
                     }
-                    catch
-                    {
-                        // Foreign or locked shortcuts are not counted.
-                    }
+                    catch { }
                 }
             }
         }
@@ -163,62 +135,41 @@ public sealed class ShortcutService
         {
             return 0;
         }
-        finally
-        {
-            if (shell is not null)
-            {
-                Marshal.FinalReleaseComObject(shell);
-            }
-        }
 
         return count;
     }
 
-    public string? CreateSetupShortcut(string setupExe, string label = "Configurar SteamSwitcher")
+    public string? CreateSetupShortcut(string setupExe, string? label = null)
     {
         if (!File.Exists(setupExe))
         {
             return null;
         }
 
+        var title = !string.IsNullOrWhiteSpace(label)
+            ? label
+            : (LocalizationService.T("ShortcutSetupTitle") ?? "SteamSwitcher Setup");
+
         var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs");
         Directory.CreateDirectory(root);
-        var path = Path.Combine(root, $"{Sanitize(label)}.lnk");
-        object? shell = null;
+        var path = Path.Combine(root, $"{Sanitize(title)}.lnk");
+
         try
         {
-            var shellType = Type.GetTypeFromProgID("WScript.Shell")
-                ?? throw new InvalidOperationException(LocalizationService.T("StatusShortcutComUnavailable"));
-            shell = Activator.CreateInstance(shellType)
-                ?? throw new InvalidOperationException(LocalizationService.T("StatusShortcutStartFailed"));
-            dynamic wsh = shell;
-            dynamic shortcut = wsh.CreateShortcut(path);
-            try
-            {
-                shortcut.TargetPath = setupExe;
-                shortcut.Arguments = string.Empty;
-                shortcut.WorkingDirectory = Path.GetDirectoryName(setupExe) ?? string.Empty;
-                shortcut.IconLocation = $"{setupExe},0";
-                shortcut.Description = LocalizationService.T("ShortcutSetupDescription");
-                shortcut.Save();
-            }
-            finally
-            {
-                Marshal.FinalReleaseComObject(shortcut);
-            }
+            _coreShortcut.CreateShortcut(
+                path,
+                setupExe,
+                string.Empty,
+                Path.GetDirectoryName(setupExe) ?? string.Empty,
+                LocalizationService.T("ShortcutSetupDescription") ?? "Configure SteamSwitcher",
+                setupExe,
+                0);
 
             return path;
         }
         catch
         {
             return null;
-        }
-        finally
-        {
-            if (shell is not null)
-            {
-                Marshal.FinalReleaseComObject(shell);
-            }
         }
     }
 
@@ -274,29 +225,30 @@ public sealed class ShortcutService
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "SteamSwitcher")
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs");
 
-    private static bool IsManagedShortcut(dynamic wsh, string path)
+    private static bool IsManagedShortcut(string path)
     {
-        dynamic shortcut = wsh.CreateShortcut(path);
         try
         {
-            string? target = shortcut.TargetPath as string;
+            var link = (IShellLinkW)new ShellLink();
+            var file = (IPersistFile)link;
+            file.Load(path, 0);
+
+            var sb = new StringBuilder(260);
+            link.GetPath(sb, sb.Capacity, out _, 0);
+            var target = sb.ToString();
+
             return !string.IsNullOrWhiteSpace(target) &&
                    Path.GetFileName(target).Equals("SteamSwitcher.exe", StringComparison.OrdinalIgnoreCase);
         }
-        finally
+        catch
         {
-            Marshal.FinalReleaseComObject(shortcut);
+            return false;
         }
     }
 
-    private static string ResolveShortcutPath(dynamic wsh, string desiredPath)
+    private static string ResolveShortcutPath(string desiredPath)
     {
-        if (!File.Exists(desiredPath))
-        {
-            return desiredPath;
-        }
-
-        if (IsManagedShortcut(wsh, desiredPath))
+        if (!File.Exists(desiredPath) || IsManagedShortcut(desiredPath))
         {
             return desiredPath;
         }
@@ -305,7 +257,7 @@ public sealed class ShortcutService
         var fileName = Path.GetFileNameWithoutExtension(desiredPath);
         var candidate = Path.Combine(directory, $"{fileName} (SteamSwitcher).lnk");
         var index = 2;
-        while (File.Exists(candidate) && !IsManagedShortcut(wsh, candidate))
+        while (File.Exists(candidate) && !IsManagedShortcut(candidate))
         {
             candidate = Path.Combine(directory, $"{fileName} (SteamSwitcher {index}).lnk");
             index++;
@@ -314,8 +266,7 @@ public sealed class ShortcutService
         return candidate;
     }
 
-    private static void CreateForRoot(
-        dynamic wsh,
+    private void CreateForRoot(
         string root,
         string label,
         string backendPath,
@@ -326,76 +277,86 @@ public sealed class ShortcutService
     {
         Directory.CreateDirectory(root);
 
+        var argsBuilder = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(spec.DirectoryPath))
+        {
+            argsBuilder.Append($"--dir \"{spec.DirectoryPath}\" ");
+        }
+        if (!string.IsNullOrWhiteSpace(spec.Key))
+        {
+            argsBuilder.Append($"--account \"{spec.Key}\"");
+        }
+        var baseArgs = argsBuilder.ToString().Trim();
+
         if (spec.Mode is ShortcutMode.Normal or ShortcutMode.Both)
         {
-            CreateShortcut(
-                wsh,
-                ResolveShortcutPath(wsh, Path.Combine(root, $"{label}.lnk")),
+            var lnkPath = ResolveShortcutPath(Path.Combine(root, $"{label}.lnk"));
+            _coreShortcut.CreateShortcut(
+                lnkPath,
                 backendPath,
+                baseArgs,
                 workingDirectory,
-                spec.Key,
+                LocalizationService.T("ShortcutNormalDescription", spec.Name) ?? spec.Name,
                 spec.SteamExePath,
-                false,
-                ref created,
-                paths,
-                spec.Name);
+                0);
+            paths.Add(lnkPath);
+            created++;
         }
 
         if (spec.Mode is ShortcutMode.BigPicture or ShortcutMode.Both)
         {
-            CreateShortcut(
-                wsh,
-                ResolveShortcutPath(wsh, Path.Combine(root, $"{label} Big Picture.lnk")),
+            var lnkPath = ResolveShortcutPath(Path.Combine(root, $"{label} Big Picture.lnk"));
+            var bpArgs = string.IsNullOrWhiteSpace(baseArgs) ? "--bigpicture" : $"{baseArgs} --bigpicture";
+            _coreShortcut.CreateShortcut(
+                lnkPath,
                 backendPath,
+                bpArgs,
                 workingDirectory,
-                spec.Key,
+                LocalizationService.T("ShortcutBigDescription", spec.Name) ?? spec.Name,
                 spec.SteamExePath,
-                true,
-                ref created,
-                paths,
-                spec.Name);
-        }
-    }
-
-    private static void CreateShortcut(
-        dynamic wsh,
-        string path,
-        string backendPath,
-        string workingDirectory,
-        string key,
-        string steamExePath,
-        bool bigPicture,
-        ref int created,
-        ICollection<string> paths,
-        string displayName)
-    {
-        dynamic shortcut = wsh.CreateShortcut(path);
-        try
-        {
-            shortcut.TargetPath = backendPath;
-            shortcut.Arguments = bigPicture
-                ? $"--profile \"{key}\" --bigpicture"
-                : $"--profile \"{key}\"";
-            shortcut.WorkingDirectory = workingDirectory;
-            shortcut.IconLocation = $"{steamExePath},0";
-            shortcut.Description = bigPicture
-                ? LocalizationService.T("ShortcutBigDescription", displayName)
-                : LocalizationService.T("ShortcutNormalDescription", displayName);
-            shortcut.Save();
-            paths.Add(path);
+                0);
+            paths.Add(lnkPath);
             created++;
-        }
-        finally
-        {
-            Marshal.FinalReleaseComObject(shortcut);
         }
     }
 
     private static string Sanitize(string name)
     {
         var invalid = Path.GetInvalidFileNameChars();
-        var value = new string(name.Select(character => invalid.Contains(character) ? '-' : character).ToArray()).Trim();
+        var value = new string(name.Select(c => invalid.Contains(c) ? '-' : c).ToArray()).Trim();
         return string.IsNullOrWhiteSpace(value) ? "Steam" : value;
     }
-}
 
+    #region COM Interop
+
+    [ComImport]
+    [Guid("00021401-0000-0000-C000-000000000046")]
+    private class ShellLink { }
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("000214F9-0000-0000-C000-000000000046")]
+    private interface IShellLinkW
+    {
+        void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, out IntPtr pfd, uint fFlags);
+        void GetIDList(out IntPtr ppidl);
+        void SetIDList(IntPtr pidl);
+        void GetDescription([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszName, int cchMaxName);
+        void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+        void GetWorkingDirectory([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
+        void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
+        void GetArguments([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
+        void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
+        void GetHotkey(out ushort pwHotkey);
+        void SetHotkey(ushort wHotkey);
+        void GetShowCmd(out int piShowCmd);
+        void SetShowCmd(int iShowCmd);
+        void GetIconLocation([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
+        void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+        void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, uint dwReserved);
+        void Resolve(IntPtr hwnd, uint fFlags);
+        void SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+    }
+
+    #endregion
+}

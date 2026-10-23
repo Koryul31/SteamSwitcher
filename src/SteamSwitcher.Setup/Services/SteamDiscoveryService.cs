@@ -1,7 +1,7 @@
-﻿using System.IO;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
+using System.IO;
+using SteamSwitcher.Core.Vdf;
 using SteamSwitcher.Setup.Models;
+using Microsoft.Win32;
 
 namespace SteamSwitcher.Setup.Services;
 
@@ -162,20 +162,22 @@ public sealed class SteamDiscoveryService
                 return [];
             }
 
+            // Parse using robust Valve KeyValues AST parser
+            var root = VdfParser.Parse(text);
+            var usersObj = root.GetObject("users") ?? root;
             var accounts = new List<SteamAccountInfo>();
-            foreach (Match match in Regex.Matches(text, "(?ms)\"(?<id>\\d+)\"\\s*\\{(?<body>[^{}]*)\\}"))
-            {
-                var body = match.Groups["body"].Value;
-                var account = Regex.Match(body, "\"AccountName\"\\s*\"([^\"]+)\"").Groups[1].Value;
-                if (string.IsNullOrWhiteSpace(account))
-                {
-                    continue;
-                }
 
-                var persona = Regex.Match(body, "\"PersonaName\"\\s*\"([^\"]+)\"").Groups[1].Value;
-                var remember = Regex.Match(body, "\"RememberPassword\"\\s*\"([^\"]+)\"").Groups[1].Value;
-                var recent = Regex.Match(body, "\"MostRecent\"\\s*\"([^\"]+)\"").Groups[1].Value;
-                accounts.Add(new SteamAccountInfo(account, persona, remember == "1", recent == "1"));
+            foreach (var child in usersObj.Children)
+            {
+                if (child is not VdfObject userObj) continue;
+
+                var account = userObj.GetString("AccountName");
+                if (string.IsNullOrWhiteSpace(account)) continue;
+
+                var persona = userObj.GetString("PersonaName") ?? string.Empty;
+                var remember = userObj.GetString("RememberPassword") == "1";
+                var recent = userObj.GetString("MostRecent") == "1";
+                accounts.Add(new SteamAccountInfo(account, persona, remember, recent));
             }
 
             return accounts

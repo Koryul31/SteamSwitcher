@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,6 +39,21 @@ public sealed partial class BayViewModel : ObservableObject
 
     [ObservableProperty]
     private string _accountsSummary = LocalizationService.T("AccountsNone");
+
+    [ObservableProperty]
+    private bool _isSingleSteamMode = true;
+
+    public string BayTitle => IsSingleSteamMode
+        ? (Slot == "A" ? LocalizationService.T("BayPrimarySteam") : LocalizationService.T("BaySecondaryProfile"))
+        : LocalizationService.T("BayInstallationSlot", Slot);
+
+    public string AccountSlotTitle => IsSingleSteamMode
+        ? LocalizationService.T("BayProfileSlot", Slot)
+        : LocalizationService.T("BayInstallationSlot", Slot);
+
+    public string AccountSubheader => IsSingleSteamMode
+        ? LocalizationService.T("BaySharedFolder")
+        : PathDisplay;
 
     public BayViewModel(string slot, string accentHex)
     {
@@ -163,6 +178,10 @@ public sealed partial class BayViewModel : ObservableObject
         OnPropertyChanged(nameof(AccountHintText));
         OnPropertyChanged(nameof(InstallationStatusText));
         OnPropertyChanged(nameof(ShortcutModeLabel));
+        OnPropertyChanged(nameof(BayTitle));
+        OnPropertyChanged(nameof(AccountSlotTitle));
+        OnPropertyChanged(nameof(AccountSubheader));
+        OnPropertyChanged(nameof(PathDisplay));
         UpdateStatus();
     }
 
@@ -195,6 +214,13 @@ public sealed partial class BayViewModel : ObservableObject
         StatusText = LocalizationService.T("BayReady");
         StatusBrush = AccentBrush;
         OnPropertyChanged(nameof(StatusBrush));
+    }
+
+    partial void OnIsSingleSteamModeChanged(bool value)
+    {
+        OnPropertyChanged(nameof(BayTitle));
+        OnPropertyChanged(nameof(AccountSlotTitle));
+        OnPropertyChanged(nameof(AccountSubheader));
     }
 
     partial void OnNameChanged(string value)

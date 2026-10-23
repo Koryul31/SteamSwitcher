@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SteamSwitcher.Setup.Views.AccountsView"
+<UserControl x:Class="SteamSwitcher.Setup.Views.AccountsView"
              xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -26,6 +26,59 @@
                 </Grid>
             </Border>
 
+            <!-- 1-Click Multi-Account Quick Actions -->
+            <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Key=AccountsDiscoveredTitle}"
+                                       Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{loc:Loc Key=AccountsDiscoveredDesc}"
+                                       Style="{StaticResource CaptionText}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding AllDiscoveredAccounts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="12,10" Margin="0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource InkBrush}" />
+                                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                <TextBlock Text="{loc:Loc Key=AccountsRememberPassword}" FontSize="11" Foreground="{DynamicResource MutedBrush}" />
+                                                <TextBlock Text="{Binding RememberPassword}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                                <TextBlock Text=" · SteamID: " FontSize="11" Foreground="{DynamicResource MutedBrush}" Margin="8,0,0,0" />
+                                                <TextBlock Text="{Binding SteamId64}" FontSize="11" Foreground="{DynamicResource MutedBrush}" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Key=AccountsLaunch}" Padding="12,0" Height="28"
+                                                    Command="{Binding DataContext.QuickLaunchAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=AccountsAddDesktop}" Padding="10,0" Height="28" Margin="6,0,0,0"
+                                                    Command="{Binding DataContext.QuickCreateDesktopShortcutCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Key=AccountsAddBigPicture}" Padding="10,0" Height="28" Margin="6,0,0,0"
+                                                    Command="{Binding DataContext.QuickCreateBigPictureShortcutCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Profile Pairs (A / B) Configuration -->
+            <TextBlock Text="{Binding AccountSectionTitle}" Style="{StaticResource SectionTitle}" Margin="0,4,0,8" />
             <ContentControl Content="{Binding BayA}"
                             ContentTemplate="{StaticResource AccountBayTemplate}" />
             <ContentControl Content="{Binding BayB}"
@@ -37,4 +90,3 @@
         </StackPanel>
     </ScrollViewer>
 </UserControl>
-

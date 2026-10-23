@@ -1,12 +1,125 @@
-﻿<UserControl x:Class="SteamSwitcher.Setup.Views.InstallationsView"
+<UserControl x:Class="SteamSwitcher.Setup.Views.InstallationsView"
              xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:SteamSwitcher.Setup.Controls">
+    <UserControl.Resources>
+        <Style x:Key="ModeCardRadioButton" TargetType="RadioButton">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="CardBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="14,12">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   HorizontalContentAlignment="Stretch">
         <StackPanel Margin="0,0,24,8">
+
+            <!-- Architecture Mode Selector -->
+            <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Key=ModeChooseTitle}" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{loc:Loc Key=ModeChooseDesc}"
+                                       Style="{StaticResource CaptionText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Option 1: One-Steam Solution -->
+                        <RadioButton Grid.Column="0"
+                                     Style="{StaticResource ModeCardRadioButton}"
+                                     IsChecked="{Binding IsSingleSteamMode, Mode=TwoWay}"
+                                     GroupName="ArchitectureMode">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="{DynamicResource AccentBrush}" CornerRadius="10" Width="20" Height="20" Margin="0,0,8,0">
+                                        <TextBlock Text="1" Foreground="{DynamicResource OnAccentBrush}" FontWeight="Bold" FontSize="11"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{loc:Loc Key=ModeOneSteamTitle}" FontWeight="Bold" FontSize="13"
+                                               Foreground="{DynamicResource InkBrush}" VerticalAlignment="Center" />
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{loc:Loc Key=ModeOneSteamTag}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Grid.Row="1" Text="{loc:Loc Key=ModeOneSteamSummary}"
+                                           FontWeight="SemiBold" FontSize="11.5" Foreground="{DynamicResource InkBrush}" Margin="0,6,0,0" />
+                                <TextBlock Grid.Row="2" Text="{loc:Loc Key=ModeOneSteamDesc}"
+                                           FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </Grid>
+                        </RadioButton>
+
+                        <!-- Option 2: Two-Steam Solution (Point 5) -->
+                        <RadioButton Grid.Column="2"
+                                     Style="{StaticResource ModeCardRadioButton}"
+                                     IsChecked="{Binding IsDualSteamMode, Mode=TwoWay}"
+                                     GroupName="ArchitectureMode">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="{DynamicResource AccentBrush}" CornerRadius="10" Width="20" Height="20" Margin="0,0,8,0">
+                                        <TextBlock Text="2" Foreground="{DynamicResource OnAccentBrush}" FontWeight="Bold" FontSize="11"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{loc:Loc Key=ModeTwoSteamTitle}" FontWeight="Bold" FontSize="13"
+                                               Foreground="{DynamicResource InkBrush}" VerticalAlignment="Center" />
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{loc:Loc Key=ModeTwoSteamTag}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Grid.Row="1" Text="{loc:Loc Key=ModeTwoSteamSummary}"
+                                           FontWeight="SemiBold" FontSize="11.5" Foreground="{DynamicResource InkBrush}" Margin="0,6,0,0" />
+                                <TextBlock Grid.Row="2" Text="{loc:Loc Key=ModeTwoSteamDesc}"
+                                           FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </Grid>
+                        </RadioButton>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Missing Steam Installation Banner -->
             <Border Style="{StaticResource BayCard}" Margin="0,0,0,12"
                     Visibility="{Binding NeedsInstallation, Converter={StaticResource BoolToVisibility}}">
                 <Grid>
@@ -29,12 +142,49 @@
                 </Grid>
             </Border>
 
+            <!-- Multi-Installation Note (Point 5) - Visible only in Dual-Steam Mode -->
+            <Border Style="{StaticResource HelpStrip}" Margin="0,0,0,12"
+                    Visibility="{Binding IsDualSteamMode, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc Key=MultiInstallTitle}" Style="{StaticResource SectionTitle}" />
+                    <TextBlock Text="{Binding MultiInstallNotice}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- Installation Bay A (Always shown: Primary Steam in Single mode, Installation A in Dual mode) -->
             <ContentControl Content="{Binding BayA}"
                             ContentTemplate="{StaticResource InstallationBayTemplate}" />
+
+            <!-- Installation Bay B (Shown ONLY in Two-Steam Mode) -->
             <ContentControl Content="{Binding BayB}"
                             ContentTemplate="{StaticResource InstallationBayTemplate}"
+                            Visibility="{Binding IsDualSteamMode, Converter={StaticResource BoolToVisibility}}"
                             Margin="0,10,0,0" />
 
+            <!-- Single-Mode Informational Card -->
+            <Border Style="{StaticResource HelpStrip}" Margin="0,10,0,0"
+                    Visibility="{Binding IsSingleSteamMode, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="22" Height="22" CornerRadius="11"
+                            Background="{DynamicResource AccentSoftBrush}"
+                            VerticalAlignment="Top" Margin="0,1,10,0">
+                        <TextBlock Text="✓" FontFamily="{StaticResource BodyFont}" FontSize="12"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{loc:Loc Key=ModeSingleActiveTitle}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{loc:Loc Key=ModeSingleActiveDesc}"
+                                   Style="{StaticResource CaptionText}" Margin="0,3,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Bottom Actions / InfoTip -->
             <controls:InfoTip Margin="0,12,0,0"
                               Text="{loc:Loc Key=InstallTip}">
                 <controls:InfoTip.Actions>
@@ -43,6 +193,7 @@
                                 Padding="11,0" Command="{Binding RefreshDetectionCommand}" />
                         <Button Style="{StaticResource GhostButton}" Content="{loc:Loc Key=Swap}"
                                 Padding="11,0" Command="{Binding SwapBaysCommand}"
+                                Visibility="{Binding IsDualSteamMode, Converter={StaticResource BoolToVisibility}}"
                                 Margin="4,0,0,0" />
                     </StackPanel>
                 </controls:InfoTip.Actions>
@@ -50,4 +201,3 @@
         </StackPanel>
     </ScrollViewer>
 </UserControl>
-
