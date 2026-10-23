@@ -85,14 +85,7 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
         SourceInitialized += MainWindow_SourceInitialized;
         DpiChanged += MainWindow_DpiChanged;
-        StateChanged += (_, _) =>
-        {
-            if (WindowState == WindowState.Maximized)
-            {
-                WindowState = WindowState.Normal;
-            }
-        };
-        Closing += MainWindow_Closing;
+                Closing += MainWindow_Closing;
         Closed += MainWindow_Closed;
         Activated += MainWindow_Activated;
         ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
@@ -752,6 +745,11 @@ public partial class MainWindow : Window
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
     {
         WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -18,6 +18,84 @@ public sealed partial class SetupViewModel : ObservableObject
     private readonly SteamAccountService _accountService = new();
     private readonly SteamLaunchService _launchService = new();
     private readonly ShortcutService _shortcutService = new();
+    private readonly Core.Services.SteamDiscoveryService _coreDiscovery = new();
+    private readonly Core.Services.SteamAccountService _coreAccountService = new();
+    private readonly Core.Services.RegistryService _coreRegistry = new();
+    private readonly Core.Services.SteamProcessService _coreProcess = new();
+    private readonly Core.Services.ShortcutService _coreShortcut = new();
+    private readonly Core.Services.SteamSwitchService _coreSwitch;
+
+    public ObservableCollection<Core.Models.SteamAccount> AllDiscoveredAccounts { get; } = [];
+
+    [ObservableProperty]
+    private bool _isSingleSteamMode = true;
+
+    public bool IsDualSteamMode
+    {
+        get => !IsSingleSteamMode;
+        set => IsSingleSteamMode = !value;
+    }
+
+    public string ModeTitle => IsSingleSteamMode
+        ? LocalizationService.T("ModeOneSteamTitle")
+        : LocalizationService.T("ModeTwoSteamTitle");
+
+    public string ModeBadge => IsSingleSteamMode
+        ? LocalizationService.T("ModeOneSteamTag")
+        : LocalizationService.T("ModeTwoSteamTag");
+
+    public string ModeDescription => IsSingleSteamMode
+        ? LocalizationService.T("ModeOneSteamDesc")
+        : LocalizationService.T("ModeTwoSteamDesc");
+
+    public string AccountSectionTitle => IsSingleSteamMode
+        ? LocalizationService.T("AccountsSlotTitleSingle")
+        : LocalizationService.T("AccountsSlotTitleDual");
+
+    [RelayCommand]
+    private void SelectSingleSteamMode()
+    {
+        IsSingleSteamMode = true;
+    }
+
+    [RelayCommand]
+    private void SelectDualSteamMode()
+    {
+        IsSingleSteamMode = false;
+    }
+
+    partial void OnIsSingleSteamModeChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsDualSteamMode));
+        OnPropertyChanged(nameof(NeedsInstallation));
+        OnPropertyChanged(nameof(InstallationsStatus));
+        OnPropertyChanged(nameof(ModeTitle));
+        OnPropertyChanged(nameof(ModeBadge));
+        OnPropertyChanged(nameof(ModeDescription));
+        OnPropertyChanged(nameof(AccountSectionTitle));
+
+        BayA.IsSingleSteamMode = value;
+        BayB.IsSingleSteamMode = value;
+
+        if (value)
+        {
+            if (BayA.IsInstalled)
+            {
+                BayB.SetDirectory(BayA.DirectoryPath);
+                RefreshAccountsInternal(BayA.SelectedAccount?.AccountName, BayB.SelectedAccount?.AccountName);
+            }
+        }
+        else
+        {
+            if (SameDirectory())
+            {
+                BayB.SetDirectory(string.Empty);
+            }
+        }
+
+        MarkDirty();
+        UpdateSummaries();
+    }
     private readonly BackendConfiguration _backend;
     private readonly SetupContext _context;
     private SetupPreferences _preferences;
@@ -76,8 +154,10 @@ public sealed partial class SetupViewModel : ObservableObject
         BayA.PropertyChanged += Bay_PropertyChanged;
         BayB.PropertyChanged += Bay_PropertyChanged;
         LocalizationService.LanguageChanged += Localization_LanguageChanged;
+        _coreSwitch = new Core.Services.SteamSwitchService(_coreDiscovery, _coreAccountService, _coreRegistry, _coreProcess);
 
         LoadState();
+        RefreshAllAccounts();
     }
 
     public BayViewModel BayA { get; }
@@ -124,7 +204,7 @@ public sealed partial class SetupViewModel : ObservableObject
 
             return locations.Count == 0
                 ? LocalizationService.T("LocationNone")
-                : string.Join(" · ", locations);
+                : string.Join(" � ", locations);
         }
     }
 
@@ -200,6 +280,11 @@ public sealed partial class SetupViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(Version));
+        OnPropertyChanged(nameof(ModeTitle));
+        OnPropertyChanged(nameof(ModeBadge));
+        OnPropertyChanged(nameof(ModeDescription));
+        OnPropertyChanged(nameof(AccountSectionTitle));
+        OnPropertyChanged(nameof(MultiInstallNotice));
 
         BayA.RefreshLocalization();
         BayB.RefreshLocalization();
@@ -212,11 +297,16 @@ public sealed partial class SetupViewModel : ObservableObject
         UpdateSummaries();
     }
     public string ShortcutSummary =>
-        $"{BayA.NameDisplay}: {BayA.ShortcutModeLabel} · {BayB.NameDisplay}: {BayB.ShortcutModeLabel}";
+        $"{BayA.NameDisplay}: {BayA.ShortcutModeLabel} � {BayB.NameDisplay}: {BayB.ShortcutModeLabel}";
     public string InstallationsStatus =>
-        BayA.IsInstalled && BayB.IsInstalled && !SameDirectory()
-            ? LocalizationService.T("StateReady")
-            : LocalizationService.T("StatePending");
+        IsSingleSteamMode
+            ? (BayA.IsInstalled ? LocalizationService.T("StateReady") : LocalizationService.T("StatePending"))
+            : (BayA.IsInstalled && BayB.IsInstalled && !SameDirectory() ? LocalizationService.T("StateReady") : LocalizationService.T("StatePending"));
+
+    public bool NeedsInstallation =>
+        IsSingleSteamMode
+            ? !BayA.IsInstalled
+            : (!BayA.IsInstalled || !BayB.IsInstalled);
     public string AccountsStatus =>
         BayA.SelectedAccount is not null && BayB.SelectedAccount is not null &&
         !SameAccount()
@@ -248,8 +338,7 @@ public sealed partial class SetupViewModel : ObservableObject
         ? LocalizationService.T("PairReadyDetail")
         : LocalizationService.T("PairProgressDetail");
     public bool HasSavedConfiguration => _context.HasSettings && _backend.Profiles.Count >= 2;
-    public bool NeedsInstallation => !BayA.IsInstalled || !BayB.IsInstalled;
-    public bool ShortcutsReady
+        public bool ShortcutsReady
     {
         get
         {
@@ -260,7 +349,7 @@ public sealed partial class SetupViewModel : ObservableObject
     }
     public bool IsFullyConfigured =>
         HasSavedConfiguration &&
-        BayA.IsInstalled && BayB.IsInstalled &&
+        (IsSingleSteamMode ? BayA.IsInstalled : (BayA.IsInstalled && BayB.IsInstalled)) &&
         BayA.SelectedAccount is not null && BayB.SelectedAccount is not null &&
         !SameAccount() && BothAccountsRemembered &&
         _context.HasBackend && ShortcutsReady;
@@ -336,6 +425,17 @@ public sealed partial class SetupViewModel : ObservableObject
 
     private bool ValidateInstallations(out string message)
     {
+        if (IsSingleSteamMode)
+        {
+            if (!BayA.IsInstalled)
+            {
+                message = LocalizationService.T("ValidationNeedInstalls");
+                return false;
+            }
+            message = string.Empty;
+            return true;
+        }
+
         if (!BayA.IsInstalled || !BayB.IsInstalled)
         {
             message = LocalizationService.T("ValidationNeedInstalls");
@@ -430,7 +530,7 @@ public sealed partial class SetupViewModel : ObservableObject
             {
                 warnings.Add(LocalizationService.T("WarningNoConfig"));
             }
-            if (!BayA.IsInstalled || !BayB.IsInstalled)
+            if (IsSingleSteamMode ? !BayA.IsInstalled : (!BayA.IsInstalled || !BayB.IsInstalled))
             {
                 warnings.Add(LocalizationService.T("WarningMissingInstall"));
             }
@@ -479,21 +579,35 @@ public sealed partial class SetupViewModel : ObservableObject
             BayA.SetDirectory(string.IsNullOrWhiteSpace(profileA?.ExePath) ? string.Empty : profileA.ExePath);
             BayB.SetDirectory(string.IsNullOrWhiteSpace(profileB?.ExePath) ? string.Empty : profileB.ExePath);
 
+            IsSingleSteamMode = _preferences.IsSingleSteamMode;
+            BayA.IsSingleSteamMode = IsSingleSteamMode;
+            BayB.IsSingleSteamMode = IsSingleSteamMode;
+
             if (string.IsNullOrWhiteSpace(BayA.DirectoryPath) && discovery.Count > 0)
             {
                 BayA.SetDirectory(discovery[0].ExePath);
             }
 
-            if (string.IsNullOrWhiteSpace(BayB.DirectoryPath) && discovery.Count > 1)
+            if (IsSingleSteamMode)
             {
-                BayB.SetDirectory(discovery[1].ExePath);
+                if (BayA.IsInstalled)
+                {
+                    BayB.SetDirectory(BayA.DirectoryPath);
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(BayB.DirectoryPath) && discovery.Count > 1)
+                {
+                    BayB.SetDirectory(discovery[1].ExePath);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(BayA.DirectoryPath))
             {
                 BayA.SetDirectory(DefaultTarget("A"));
             }
-            if (string.IsNullOrWhiteSpace(BayB.DirectoryPath))
+            if (!IsSingleSteamMode && string.IsNullOrWhiteSpace(BayB.DirectoryPath))
             {
                 BayB.SetDirectory(DefaultTarget("B"));
             }
@@ -747,13 +861,17 @@ public sealed partial class SetupViewModel : ObservableObject
             var accountA = BayA.SelectedAccount;
             var modeA = BayA.ShortcutMode;
 
-            BayA.DirectoryPath = BayB.DirectoryPath;
+            if (!IsSingleSteamMode)
+            {
+                BayA.DirectoryPath = BayB.DirectoryPath;
+                BayB.DirectoryPath = directoryA;
+            }
+
             BayA.Name = BayB.Name;
             BayA.ProfileKey = BayB.ProfileKey;
             BayA.SelectedAccount = BayB.SelectedAccount;
             BayA.ShortcutMode = BayB.ShortcutMode;
 
-            BayB.DirectoryPath = directoryA;
             BayB.Name = nameA;
             BayB.ProfileKey = keyA;
             BayB.SelectedAccount = accountA;
@@ -812,7 +930,8 @@ public sealed partial class SetupViewModel : ObservableObject
                 ShortcutLayout = ShortcutLayout,
                 CreateDesktop = CreateDesktop,
                 CreateStartMenu = CreateStartMenu,
-                WelcomeCompleted = _preferences.WelcomeCompleted
+                WelcomeCompleted = _preferences.WelcomeCompleted,
+                IsSingleSteamMode = IsSingleSteamMode
             };
             _preferences.Save(_context);
 
@@ -820,15 +939,25 @@ public sealed partial class SetupViewModel : ObservableObject
                 _context.BackendPath,
                 _context.RootDirectory,
                 [
-                    new ShortcutSpec(BayA.ProfileKey, BayA.NameDisplay, BayA.ShortcutMode, BayA.ExePath),
-                    new ShortcutSpec(BayB.ProfileKey, BayB.NameDisplay, BayB.ShortcutMode, BayB.ExePath)
+                    new ShortcutSpec(
+                        BayA.SelectedAccount?.AccountName ?? BayA.ProfileKey,
+                        BayA.NameDisplay,
+                        BayA.ShortcutMode,
+                        BayA.ExePath,
+                        IsSingleSteamMode ? null : BayA.DirectoryPath),
+                    new ShortcutSpec(
+                        BayB.SelectedAccount?.AccountName ?? BayB.ProfileKey,
+                        BayB.NameDisplay,
+                        BayB.ShortcutMode,
+                        BayB.ExePath,
+                        IsSingleSteamMode ? null : BayB.DirectoryPath)
                 ],
                 ShortcutLayout,
                 CreateDesktop,
                 CreateStartMenu);
 
             var setupExe = Environment.ProcessPath;
-            if (!string.IsNullOrWhiteSpace(setupExe) && File.Exists(setupExe))
+            if (CreateStartMenu && !string.IsNullOrWhiteSpace(setupExe) && File.Exists(setupExe))
             {
                 _shortcutService.CreateSetupShortcut(setupExe);
             }
@@ -954,6 +1083,23 @@ public sealed partial class SetupViewModel : ObservableObject
         {
             RefreshBayAccounts(BayA, preferredA);
             RefreshBayAccounts(BayB, preferredB);
+            RefreshAllAccounts();
+
+            if (IsSingleSteamMode && BayA.Accounts.Count > 1)
+            {
+                if (BayA.SelectedAccount is null)
+                {
+                    BayA.SelectedAccount = BayA.Accounts[0];
+                }
+                if (BayB.SelectedAccount is null || BayB.SelectedAccount.AccountName.Equals(BayA.SelectedAccount?.AccountName, StringComparison.OrdinalIgnoreCase))
+                {
+                    var secondAccount = BayB.Accounts.FirstOrDefault(a => !a.AccountName.Equals(BayA.SelectedAccount?.AccountName, StringComparison.OrdinalIgnoreCase));
+                    if (secondAccount is not null)
+                    {
+                        BayB.SelectedAccount = secondAccount;
+                    }
+                }
+            }
         }
         finally
         {
@@ -1012,7 +1158,7 @@ public sealed partial class SetupViewModel : ObservableObject
             return 0;
         }
 
-        if (!BayA.IsInstalled || !BayB.IsInstalled)
+        if (IsSingleSteamMode ? !BayA.IsInstalled : (!BayA.IsInstalled || !BayB.IsInstalled))
         {
             return 0;
         }
@@ -1108,6 +1254,11 @@ public sealed partial class SetupViewModel : ObservableObject
 
     private static string SuggestName(BayViewModel bay, BayViewModel other)
     {
+        if (bay.IsSingleSteamMode)
+        {
+            return bay.Slot == "A" ? "Steam (Main)" : "Steam (Alt)";
+        }
+
         var folderName = Path.GetFileName(bay.DirectoryPath.TrimEnd('\\'));
         if (!string.IsNullOrWhiteSpace(folderName))
         {
@@ -1183,4 +1334,86 @@ public sealed partial class SetupViewModel : ObservableObject
             UseShellExecute = true
         });
     }
+    public void RefreshAllAccounts()
+    {
+        AllDiscoveredAccounts.Clear();
+        var primary = _coreDiscovery.GetPrimaryInstallation();
+        if (primary != null)
+        {
+            var accounts = _coreAccountService.GetAccounts(primary);
+            foreach (var acc in accounts)
+            {
+                AllDiscoveredAccounts.Add(acc);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task QuickLaunchAccount(Core.Models.SteamAccount? account)
+    {
+        if (account == null) return;
+        var profile = new Core.Models.SteamProfile
+        {
+            Id = account.AccountName,
+            DisplayName = account.DisplayName,
+            AccountName = account.AccountName,
+            Mode = Core.Models.ProfileMode.SingleInstall
+        };
+        StatusMessage = $"Switching to {account.DisplayName}...";
+        await _coreSwitch.SwitchAsync(profile);
+        StatusMessage = $"Switched to {account.DisplayName}.";
+    }
+
+    [RelayCommand]
+    private void QuickCreateDesktopShortcut(Core.Models.SteamAccount? account)
+    {
+        if (account == null) return;
+        var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        var targetLnk = Path.Combine(desktop, $"Steam - {Sanitize(account.DisplayName)}.lnk");
+        var backendExe = _context.BackendPath;
+        var primary = _coreDiscovery.GetPrimaryInstallation();
+        var iconPath = primary?.ExePath;
+
+        _coreShortcut.CreateShortcut(
+            targetLnk,
+            backendExe,
+            $"--account \"{account.AccountName}\"",
+            _context.RootDirectory,
+            $"Launch Steam with {account.DisplayName}",
+            iconPath,
+            0);
+
+        StatusMessage = $"Shortcut created on Desktop: {Path.GetFileName(targetLnk)}";
+    }
+
+    [RelayCommand]
+    private void QuickCreateBigPictureShortcut(Core.Models.SteamAccount? account)
+    {
+        if (account == null) return;
+        var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        var targetLnk = Path.Combine(desktop, $"Steam - {Sanitize(account.DisplayName)} (Big Picture).lnk");
+        var backendExe = _context.BackendPath;
+        var primary = _coreDiscovery.GetPrimaryInstallation();
+        var iconPath = primary?.ExePath;
+
+        _coreShortcut.CreateShortcut(
+            targetLnk,
+            backendExe,
+            $"--account \"{account.AccountName}\" --bigpicture",
+            _context.RootDirectory,
+            $"Launch Steam Big Picture with {account.DisplayName}",
+            iconPath,
+            0);
+
+        StatusMessage = $"Big Picture shortcut created on Desktop: {Path.GetFileName(targetLnk)}";
+    }
+
+    private static string Sanitize(string name)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        var value = new string(name.Select(c => invalid.Contains(c) ? '-' : c).ToArray()).Trim();
+        return string.IsNullOrWhiteSpace(value) ? "Steam" : value;
+    }
+
+    public string MultiInstallNotice => LocalizationService.T("MultiInstallNotice");
 }

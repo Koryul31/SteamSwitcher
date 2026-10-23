@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace SteamSwitcher.Setup.Localization;
@@ -19,16 +19,19 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     public static IReadOnlyList<SupportedLanguage> SupportedLanguages { get; } =
     [
-        new("es", "Español"),
+        new("cs", "Čeština"),
+        new("sk", "Slovenčina"),
         new("en", "English"),
-        new("zh", "简体中文"),
-        new("hi", "हिन्दी"),
-        new("ar", "العربية"),
-        new("pt", "Português"),
-        new("ru", "Русский"),
-        new("ja", "日本語"),
+        new("de", "Deutsch"),
         new("fr", "Français"),
-        new("de", "Deutsch")
+        new("es", "Español"),
+        new("pl", "Polski"),
+        new("ru", "Русский"),
+        new("pt", "Português"),
+        new("zh", "简体中文"),
+        new("ja", "日本語"),
+        new("hi", "हिन्दी"),
+        new("ar", "العربية")
     ];
 
     public static LocalizationService Instance { get; } = new();
@@ -36,7 +39,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
     public static event Action? LanguageChanged;
 
     public string Setting { get; private set; } = "System";
-    public string CurrentCode { get; private set; } = "es";
+    public string CurrentCode { get; private set; } = "en";
     public string CurrentNativeName => GetNativeName(CurrentCode);
     public string SystemNativeName => _systemNativeName;
     public string SystemCode => _systemCode;
@@ -83,7 +86,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
     {
         if (string.IsNullOrWhiteSpace(code))
         {
-            return "es";
+            return "en";
         }
 
         var value = code.Trim().Replace('_', '-');
@@ -117,6 +120,12 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     private string Get(string key)
     {
+        if (LanguageCatalog.Languages.TryGetValue(CurrentCode, out var langCatalog) &&
+            langCatalog.TryGetValue(key, out var langVal))
+        {
+            return langVal;
+        }
+
         if (FlowCatalog.Languages.TryGetValue(CurrentCode, out var flow) &&
             flow.TryGetValue(key, out var flowValue))
         {
@@ -144,6 +153,12 @@ public sealed class LocalizationService : INotifyPropertyChanged
         if (Catalog.TryGetValue(CurrentCode, out var language) && language.TryGetValue(key, out var value))
         {
             return value;
+        }
+
+        if (LanguageCatalog.Languages.TryGetValue("en", out var enCatalog) &&
+            enCatalog.TryGetValue(key, out var enVal))
+        {
+            return enVal;
         }
 
         if (Catalog.TryGetValue("en", out var english) && english.TryGetValue(key, out value))

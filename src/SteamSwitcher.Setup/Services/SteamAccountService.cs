@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using SteamSwitcher.Setup.Localization;
 using SteamSwitcher.Setup.Models;
@@ -14,11 +14,9 @@ public sealed class SteamAccountService
             throw new FileNotFoundException(LocalizationService.T("StatusSteamNotFound"), installation.ExePath);
         }
 
-        var arguments = "-login";
-        if (!string.IsNullOrWhiteSpace(account?.AccountName))
-        {
-            arguments += $" \"{account.AccountName}\"";
-        }
+        var arguments = !string.IsNullOrWhiteSpace(account?.AccountName)
+            ? $"-login \"{account.AccountName}\""
+            : string.Empty;
 
         Process.Start(new ProcessStartInfo
         {
@@ -42,4 +40,3 @@ public sealed class SteamAccountService
         }
     }
 }
-

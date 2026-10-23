@@ -7,7 +7,7 @@
         Width="1000" Height="720"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        ResizeMode="CanMinimize"
+        ResizeMode="CanResize" MinWidth="800" MinHeight="550"
         Background="{DynamicResource WindowBackgroundBrush}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
@@ -17,7 +17,7 @@
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
-                      ResizeBorderThickness="0"
+                      ResizeBorderThickness="6"
                       GlassFrameThickness="0"
                       CornerRadius="0"
                       UseAeroCaptionButtons="False" />
@@ -69,6 +69,9 @@
                     <Button Style="{StaticResource WindowButton}" Click="MinimizeButton_Click"
                             AutomationProperties.Name="{loc:Loc Key=Minimize}">
                         <TextBlock Text="—" FontSize="13" />
+                    </Button>
+                    <Button Style="{StaticResource WindowButton}" Click="MaximizeButton_Click" Margin="4,0,0,0">
+                        <TextBlock Text="&#x25A1;" FontSize="13" />
                     </Button>
                     <Button Style="{StaticResource WindowButton}" Click="CloseButton_Click"
                             AutomationProperties.Name="{loc:Loc Key=CloseWindow}" Margin="4,0,0,0">

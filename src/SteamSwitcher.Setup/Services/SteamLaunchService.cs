@@ -56,11 +56,7 @@ public sealed class SteamLaunchService
             }
         }
 
-        var arguments = "-login";
-        if (!string.IsNullOrWhiteSpace(accountName))
-        {
-            arguments += $" \"{accountName}\"";
-        }
+        var arguments = !string.IsNullOrWhiteSpace(accountName) ? $"-login \"{accountName}\"" : string.Empty;
 
         try
         {

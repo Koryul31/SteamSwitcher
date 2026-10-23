@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SteamSwitcher.Setup.Views.SummaryView"
+<UserControl x:Class="SteamSwitcher.Setup.Views.SummaryView"
              xmlns:loc="clr-namespace:SteamSwitcher.Setup.Localization"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,6 +34,23 @@
                                Foreground="{DynamicResource AccentBrush}" />
                     <TextBlock Text="{loc:Loc Key=AppliedDesc}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
                 </StackPanel>
+            </Border>
+
+            <!-- Mode Summary Card -->
+            <Border Style="{StaticResource BayCard}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{Binding ModeTitle}" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{Binding ModeDescription}" Style="{StaticResource CaptionText}" Margin="0,3,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" Padding="12,5" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ModeBadge}" FontWeight="SemiBold" FontSize="11.5" Foreground="{DynamicResource AccentBrush}" />
+                    </Border>
+                </Grid>
             </Border>
 
             <ContentControl Content="{Binding BayA}" ContentTemplate="{StaticResource SummaryBayTemplate}" />
